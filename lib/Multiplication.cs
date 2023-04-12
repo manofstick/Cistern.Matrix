@@ -14,21 +14,39 @@ public class Multiplication<T>
         public T tmp0_0;
         public T tmp0_1;
         public T tmp0_2;
+        public T tmp0_3;
+        public T tmp0_4;
+        public T tmp0_5;
         public T tmp1_0;
         public T tmp1_1;
         public T tmp1_2;
+        public T tmp1_3;
+        public T tmp1_4;
+        public T tmp1_5;
         public T tmp2_0;
         public T tmp2_1;
         public T tmp2_2;
+        public T tmp2_3;
+        public T tmp2_4;
+        public T tmp2_5;
         public T tmp3_0;
         public T tmp3_1;
         public T tmp3_2;
+        public T tmp3_3;
+        public T tmp3_4;
+        public T tmp3_5;
         public T tmp4_0;
         public T tmp4_1;
         public T tmp4_2;
+        public T tmp4_3;
+        public T tmp4_4;
+        public T tmp4_5;
         public T tmp5_0;
         public T tmp5_1;
         public T tmp5_2;
+        public T tmp5_3;
+        public T tmp5_4;
+        public T tmp5_5;
     }
 
     ref struct Args
@@ -42,6 +60,9 @@ public class Multiplication<T>
         public Span<Vector256<T>> BTRowVector0; 
         public Span<Vector256<T>> BTRowVector1;
         public Span<Vector256<T>> BTRowVector2;
+        public Span<Vector256<T>> BTRowVector3; 
+        public Span<Vector256<T>> BTRowVector4;
+        public Span<Vector256<T>> BTRowVector5;
     }
 
 
@@ -52,45 +73,44 @@ public class Multiplication<T>
     {
         var length = args.ARowVector0.Length;
 
-        var tmpVector0_0 = Vector256<T>.Zero; var tmpVector0_1 = Vector256<T>.Zero; var tmpVector0_2 = Vector256<T>.Zero;
-        var tmpVector1_0 = Vector256<T>.Zero; var tmpVector1_1 = Vector256<T>.Zero; var tmpVector1_2 = Vector256<T>.Zero;
-        var tmpVector2_0 = Vector256<T>.Zero; var tmpVector2_1 = Vector256<T>.Zero; var tmpVector2_2 = Vector256<T>.Zero;
-        var tmpVector3_0 = Vector256<T>.Zero; var tmpVector3_1 = Vector256<T>.Zero; var tmpVector3_2 = Vector256<T>.Zero;
-        var tmpVector4_0 = Vector256<T>.Zero; var tmpVector4_1 = Vector256<T>.Zero; var tmpVector4_2 = Vector256<T>.Zero;
-        var tmpVector5_0 = Vector256<T>.Zero; var tmpVector5_1 = Vector256<T>.Zero; var tmpVector5_2 = Vector256<T>.Zero;
+         Vector256<T> tmpVector0_0 = Vector256<T>.Zero, tmpVector0_1 = Vector256<T>.Zero, tmpVector0_2 = Vector256<T>.Zero, tmpVector0_3 = Vector256<T>.Zero, tmpVector0_4 = Vector256<T>.Zero, tmpVector0_5 = Vector256<T>.Zero;
+         Vector256<T> tmpVector1_0 = Vector256<T>.Zero, tmpVector1_1 = Vector256<T>.Zero, tmpVector1_2 = Vector256<T>.Zero, tmpVector1_3 = Vector256<T>.Zero, tmpVector1_4 = Vector256<T>.Zero, tmpVector1_5 = Vector256<T>.Zero;
+         Vector256<T> tmpVector2_0 = Vector256<T>.Zero, tmpVector2_1 = Vector256<T>.Zero, tmpVector2_2 = Vector256<T>.Zero, tmpVector2_3 = Vector256<T>.Zero, tmpVector2_4 = Vector256<T>.Zero, tmpVector2_5 = Vector256<T>.Zero;
+         Vector256<T> tmpVector3_0 = Vector256<T>.Zero, tmpVector3_1 = Vector256<T>.Zero, tmpVector3_2 = Vector256<T>.Zero, tmpVector3_3 = Vector256<T>.Zero, tmpVector3_4 = Vector256<T>.Zero, tmpVector3_5 = Vector256<T>.Zero;
+         Vector256<T> tmpVector4_0 = Vector256<T>.Zero, tmpVector4_1 = Vector256<T>.Zero, tmpVector4_2 = Vector256<T>.Zero, tmpVector4_3 = Vector256<T>.Zero, tmpVector4_4 = Vector256<T>.Zero, tmpVector4_5 = Vector256<T>.Zero;
+         Vector256<T> tmpVector5_0 = Vector256<T>.Zero, tmpVector5_1 = Vector256<T>.Zero, tmpVector5_2 = Vector256<T>.Zero, tmpVector5_3 = Vector256<T>.Zero, tmpVector5_4 = Vector256<T>.Zero, tmpVector5_5 = Vector256<T>.Zero;
 
-        fixed (Vector256<T>* A0=args.ARowVector0, A1=args.ARowVector1, A2=args.ARowVector2, A3=args.ARowVector3, A4=args.ARowVector4, A5=args.ARowVector5,
-                             B0=args.BTRowVector0, B1=args.BTRowVector1, B2=args.BTRowVector2)
+        fixed (Vector256<T>* A0=args.ARowVector0,  A1=args.ARowVector1,  A2=args.ARowVector2,  A3=args.ARowVector3,  A4=args.ARowVector4,  A5=args.ARowVector5,
+                             B0=args.BTRowVector0, B1=args.BTRowVector1, B2=args.BTRowVector2, B3=args.BTRowVector3, B4=args.BTRowVector4, B5=args.BTRowVector5)
         {
             Vector256<T> x;
             for (var i = 0; i < length; ++i)
             {
-                x = A0[i]; tmpVector0_0 += x * B0[i]; tmpVector0_1 += x * B1[i]; tmpVector0_2 += x * B2[i];
-                x = A1[i]; tmpVector1_0 += x * B0[i]; tmpVector1_1 += x * B1[i]; tmpVector1_2 += x * B2[i];
-                x = A2[i]; tmpVector2_0 += x * B0[i]; tmpVector2_1 += x * B1[i]; tmpVector2_2 += x * B2[i];
-                x = A3[i]; tmpVector3_0 += x * B0[i]; tmpVector3_1 += x * B1[i]; tmpVector3_2 += x * B2[i];
-                x = A4[i]; tmpVector4_0 += x * B0[i]; tmpVector4_1 += x * B1[i]; tmpVector4_2 += x * B2[i];
-                x = A5[i]; tmpVector5_0 += x * B0[i]; tmpVector5_1 += x * B1[i]; tmpVector5_2 += x * B2[i];
+                x = A0[i]; tmpVector0_0 += x * B0[i]; tmpVector0_1 += x * B1[i]; tmpVector0_2 += x * B2[i]; tmpVector0_3 += x * B3[i]; tmpVector0_4 += x * B4[i]; tmpVector0_5 += x * B5[i];
+                x = A1[i]; tmpVector1_0 += x * B0[i]; tmpVector1_1 += x * B1[i]; tmpVector1_2 += x * B2[i]; tmpVector1_3 += x * B3[i]; tmpVector1_4 += x * B4[i]; tmpVector1_5 += x * B5[i];
+                x = A2[i]; tmpVector2_0 += x * B0[i]; tmpVector2_1 += x * B1[i]; tmpVector2_2 += x * B2[i]; tmpVector2_3 += x * B3[i]; tmpVector2_4 += x * B4[i]; tmpVector2_5 += x * B5[i];
+                x = A3[i]; tmpVector3_0 += x * B0[i]; tmpVector3_1 += x * B1[i]; tmpVector3_2 += x * B2[i]; tmpVector3_3 += x * B3[i]; tmpVector3_4 += x * B4[i]; tmpVector3_5 += x * B5[i];
+                x = A4[i]; tmpVector4_0 += x * B0[i]; tmpVector4_1 += x * B1[i]; tmpVector4_2 += x * B2[i]; tmpVector4_3 += x * B3[i]; tmpVector4_4 += x * B4[i]; tmpVector4_5 += x * B5[i];
+                x = A5[i]; tmpVector5_0 += x * B0[i]; tmpVector5_1 += x * B1[i]; tmpVector5_2 += x * B2[i]; tmpVector5_3 += x * B3[i]; tmpVector5_4 += x * B4[i]; tmpVector5_5 += x * B5[i];
             }
         }
 
-        tmp.tmp0_0 = T.Zero; tmp.tmp0_1 = T.Zero; tmp.tmp0_2 = T.Zero;
-        tmp.tmp1_0 = T.Zero; tmp.tmp1_1 = T.Zero; tmp.tmp1_2 = T.Zero;
-        tmp.tmp2_0 = T.Zero; tmp.tmp2_1 = T.Zero; tmp.tmp2_2 = T.Zero;
-        tmp.tmp3_0 = T.Zero; tmp.tmp3_1 = T.Zero; tmp.tmp3_2 = T.Zero;
-        tmp.tmp4_0 = T.Zero; tmp.tmp4_1 = T.Zero; tmp.tmp4_2 = T.Zero;
-        tmp.tmp5_0 = T.Zero; tmp.tmp5_1 = T.Zero; tmp.tmp5_2 = T.Zero;
+        tmp.tmp0_0 = T.Zero; tmp.tmp0_1 = T.Zero; tmp.tmp0_2 = T.Zero; tmp.tmp0_3 = T.Zero; tmp.tmp0_4 = T.Zero; tmp.tmp0_5 = T.Zero;
+        tmp.tmp1_0 = T.Zero; tmp.tmp1_1 = T.Zero; tmp.tmp1_2 = T.Zero; tmp.tmp1_3 = T.Zero; tmp.tmp1_4 = T.Zero; tmp.tmp1_5 = T.Zero;
+        tmp.tmp2_0 = T.Zero; tmp.tmp2_1 = T.Zero; tmp.tmp2_2 = T.Zero; tmp.tmp2_3 = T.Zero; tmp.tmp2_4 = T.Zero; tmp.tmp2_5 = T.Zero;
+        tmp.tmp3_0 = T.Zero; tmp.tmp3_1 = T.Zero; tmp.tmp3_2 = T.Zero; tmp.tmp3_3 = T.Zero; tmp.tmp3_4 = T.Zero; tmp.tmp3_5 = T.Zero;
+        tmp.tmp4_0 = T.Zero; tmp.tmp4_1 = T.Zero; tmp.tmp4_2 = T.Zero; tmp.tmp4_3 = T.Zero; tmp.tmp4_4 = T.Zero; tmp.tmp4_5 = T.Zero;
+        tmp.tmp5_0 = T.Zero; tmp.tmp5_1 = T.Zero; tmp.tmp5_2 = T.Zero; tmp.tmp5_3 = T.Zero; tmp.tmp5_4 = T.Zero; tmp.tmp5_5 = T.Zero;
         for (var i = 0; i < Vector256<T>.Count; ++i)
         {
-            tmp.tmp0_0 += tmpVector0_0[i]; tmp.tmp0_1 += tmpVector0_1[i]; tmp.tmp0_2 += tmpVector0_2[i];
-            tmp.tmp1_0 += tmpVector1_0[i]; tmp.tmp1_1 += tmpVector1_1[i]; tmp.tmp1_2 += tmpVector1_2[i];
-            tmp.tmp2_0 += tmpVector2_0[i]; tmp.tmp2_1 += tmpVector2_1[i]; tmp.tmp2_2 += tmpVector2_2[i];
-            tmp.tmp3_0 += tmpVector3_0[i]; tmp.tmp3_1 += tmpVector3_1[i]; tmp.tmp3_2 += tmpVector3_2[i];
-            tmp.tmp4_0 += tmpVector4_0[i]; tmp.tmp4_1 += tmpVector4_1[i]; tmp.tmp4_2 += tmpVector4_2[i];
-            tmp.tmp5_0 += tmpVector5_0[i]; tmp.tmp5_1 += tmpVector5_1[i]; tmp.tmp5_2 += tmpVector5_2[i];
+            tmp.tmp0_0 += tmpVector0_0[i]; tmp.tmp0_1 += tmpVector0_1[i]; tmp.tmp0_2 += tmpVector0_2[i]; tmp.tmp0_3 += tmpVector0_3[i]; tmp.tmp0_4 += tmpVector0_4[i]; tmp.tmp0_5 += tmpVector0_5[i];
+            tmp.tmp1_0 += tmpVector1_0[i]; tmp.tmp1_1 += tmpVector1_1[i]; tmp.tmp1_2 += tmpVector1_2[i]; tmp.tmp1_3 += tmpVector1_3[i]; tmp.tmp1_4 += tmpVector1_4[i]; tmp.tmp1_5 += tmpVector1_5[i];
+            tmp.tmp2_0 += tmpVector2_0[i]; tmp.tmp2_1 += tmpVector2_1[i]; tmp.tmp2_2 += tmpVector2_2[i]; tmp.tmp2_3 += tmpVector2_3[i]; tmp.tmp2_4 += tmpVector2_4[i]; tmp.tmp2_5 += tmpVector2_5[i];
+            tmp.tmp3_0 += tmpVector3_0[i]; tmp.tmp3_1 += tmpVector3_1[i]; tmp.tmp3_2 += tmpVector3_2[i]; tmp.tmp3_3 += tmpVector3_3[i]; tmp.tmp3_4 += tmpVector3_4[i]; tmp.tmp3_5 += tmpVector3_5[i];
+            tmp.tmp4_0 += tmpVector4_0[i]; tmp.tmp4_1 += tmpVector4_1[i]; tmp.tmp4_2 += tmpVector4_2[i]; tmp.tmp4_3 += tmpVector4_3[i]; tmp.tmp4_4 += tmpVector4_4[i]; tmp.tmp4_5 += tmpVector4_5[i];
+            tmp.tmp5_0 += tmpVector5_0[i]; tmp.tmp5_1 += tmpVector5_1[i]; tmp.tmp5_2 += tmpVector5_2[i]; tmp.tmp5_3 += tmpVector5_3[i]; tmp.tmp5_4 += tmpVector5_4[i]; tmp.tmp5_5 += tmpVector5_5[i];
         }
     }
-
 
     public static T[][] Multiply(T[][] A, T[][] B)
     {
@@ -135,32 +155,38 @@ public class Multiplication<T>
                 args.ARowVector4 = MemoryMarshal.Cast<T, Vector256<T>>(ARow4);
                 args.ARowVector5 = MemoryMarshal.Cast<T, Vector256<T>>(ARow5);
                 var column = 0;
-                for (; column < columns - 3 + 1; column += 3)
+                for (; column < columns - 6 + 1; column += 6)
                 {
                     var BTRow0 = BT[column + 0].AsSpan();
                     var BTRow1 = BT[column + 1].AsSpan();
                     var BTRow2 = BT[column + 2].AsSpan();
+                    var BTRow3 = BT[column + 3].AsSpan();
+                    var BTRow4 = BT[column + 4].AsSpan();
+                    var BTRow5 = BT[column + 5].AsSpan();
                     args.BTRowVector0 = MemoryMarshal.Cast<T, Vector256<T>>(BTRow0);
                     args.BTRowVector1 = MemoryMarshal.Cast<T, Vector256<T>>(BTRow1);
                     args.BTRowVector2 = MemoryMarshal.Cast<T, Vector256<T>>(BTRow2);
+                    args.BTRowVector3 = MemoryMarshal.Cast<T, Vector256<T>>(BTRow3);
+                    args.BTRowVector4 = MemoryMarshal.Cast<T, Vector256<T>>(BTRow4);
+                    args.BTRowVector5 = MemoryMarshal.Cast<T, Vector256<T>>(BTRow5);
 
                     InnerLoop(args, out var tmp);
 
                     for (var i = args.ARowVector0.Length * Vector256<T>.Count; i < ARow0.Length; ++i)
                     {
-                        tmp.tmp0_0 += ARow0[i] * BTRow0[i]; tmp.tmp0_1 += ARow0[i] * BTRow1[i]; tmp.tmp0_2 += ARow0[i] * BTRow2[i];
-                        tmp.tmp1_0 += ARow1[i] * BTRow0[i]; tmp.tmp1_1 += ARow1[i] * BTRow1[i]; tmp.tmp1_2 += ARow1[i] * BTRow2[i];
-                        tmp.tmp2_0 += ARow2[i] * BTRow0[i]; tmp.tmp2_1 += ARow2[i] * BTRow1[i]; tmp.tmp2_2 += ARow2[i] * BTRow2[i];
-                        tmp.tmp3_0 += ARow3[i] * BTRow0[i]; tmp.tmp3_1 += ARow3[i] * BTRow1[i]; tmp.tmp3_2 += ARow3[i] * BTRow2[i];
-                        tmp.tmp4_0 += ARow4[i] * BTRow0[i]; tmp.tmp4_1 += ARow4[i] * BTRow1[i]; tmp.tmp4_2 += ARow4[i] * BTRow2[i];
-                        tmp.tmp5_0 += ARow5[i] * BTRow0[i]; tmp.tmp5_1 += ARow5[i] * BTRow1[i]; tmp.tmp5_2 += ARow5[i] * BTRow2[i];
+                        tmp.tmp0_0 += ARow0[i] * BTRow0[i]; tmp.tmp0_1 += ARow0[i] * BTRow1[i]; tmp.tmp0_2 += ARow0[i] * BTRow2[i]; tmp.tmp0_3 += ARow0[i] * BTRow3[i]; tmp.tmp0_4 += ARow0[i] * BTRow4[i]; tmp.tmp0_5 += ARow0[i] * BTRow5[i];
+                        tmp.tmp1_0 += ARow1[i] * BTRow0[i]; tmp.tmp1_1 += ARow1[i] * BTRow1[i]; tmp.tmp1_2 += ARow1[i] * BTRow2[i]; tmp.tmp1_3 += ARow1[i] * BTRow3[i]; tmp.tmp1_4 += ARow1[i] * BTRow4[i]; tmp.tmp1_5 += ARow1[i] * BTRow5[i];
+                        tmp.tmp2_0 += ARow2[i] * BTRow0[i]; tmp.tmp2_1 += ARow2[i] * BTRow1[i]; tmp.tmp2_2 += ARow2[i] * BTRow2[i]; tmp.tmp2_3 += ARow2[i] * BTRow3[i]; tmp.tmp2_4 += ARow2[i] * BTRow4[i]; tmp.tmp2_5 += ARow2[i] * BTRow5[i];
+                        tmp.tmp3_0 += ARow3[i] * BTRow0[i]; tmp.tmp3_1 += ARow3[i] * BTRow1[i]; tmp.tmp3_2 += ARow3[i] * BTRow2[i]; tmp.tmp3_3 += ARow3[i] * BTRow3[i]; tmp.tmp3_4 += ARow3[i] * BTRow4[i]; tmp.tmp3_5 += ARow3[i] * BTRow5[i];
+                        tmp.tmp4_0 += ARow4[i] * BTRow0[i]; tmp.tmp4_1 += ARow4[i] * BTRow1[i]; tmp.tmp4_2 += ARow4[i] * BTRow2[i]; tmp.tmp4_3 += ARow4[i] * BTRow3[i]; tmp.tmp4_4 += ARow4[i] * BTRow4[i]; tmp.tmp4_5 += ARow4[i] * BTRow5[i];
+                        tmp.tmp5_0 += ARow5[i] * BTRow0[i]; tmp.tmp5_1 += ARow5[i] * BTRow1[i]; tmp.tmp5_2 += ARow5[i] * BTRow2[i]; tmp.tmp5_3 += ARow5[i] * BTRow3[i]; tmp.tmp5_4 += ARow5[i] * BTRow4[i]; tmp.tmp5_5 += ARow5[i] * BTRow5[i];
                     }
-                    result[row + 0][column + 0] = tmp.tmp0_0; result[row + 0][column + 1] = tmp.tmp0_1; result[row + 0][column + 2] = tmp.tmp0_2;
-                    result[row + 1][column + 0] = tmp.tmp1_0; result[row + 1][column + 1] = tmp.tmp1_1; result[row + 1][column + 2] = tmp.tmp1_2;
-                    result[row + 2][column + 0] = tmp.tmp2_0; result[row + 2][column + 1] = tmp.tmp2_1; result[row + 2][column + 2] = tmp.tmp2_2;
-                    result[row + 3][column + 0] = tmp.tmp3_0; result[row + 3][column + 1] = tmp.tmp3_1; result[row + 3][column + 2] = tmp.tmp3_2;
-                    result[row + 4][column + 0] = tmp.tmp4_0; result[row + 4][column + 1] = tmp.tmp4_1; result[row + 4][column + 2] = tmp.tmp4_2;
-                    result[row + 5][column + 0] = tmp.tmp5_0; result[row + 5][column + 1] = tmp.tmp5_1; result[row + 5][column + 2] = tmp.tmp5_2;
+                    result[row + 0][column + 0] = tmp.tmp0_0; result[row + 0][column + 1] = tmp.tmp0_1; result[row + 0][column + 2] = tmp.tmp0_2; result[row + 0][column + 3] = tmp.tmp0_3; result[row + 0][column + 4] = tmp.tmp0_4; result[row + 0][column + 5] = tmp.tmp0_5;
+                    result[row + 1][column + 0] = tmp.tmp1_0; result[row + 1][column + 1] = tmp.tmp1_1; result[row + 1][column + 2] = tmp.tmp1_2; result[row + 1][column + 3] = tmp.tmp1_3; result[row + 1][column + 4] = tmp.tmp1_4; result[row + 1][column + 5] = tmp.tmp1_5;
+                    result[row + 2][column + 0] = tmp.tmp2_0; result[row + 2][column + 1] = tmp.tmp2_1; result[row + 2][column + 2] = tmp.tmp2_2; result[row + 2][column + 3] = tmp.tmp2_3; result[row + 2][column + 4] = tmp.tmp2_4; result[row + 2][column + 5] = tmp.tmp2_5;
+                    result[row + 3][column + 0] = tmp.tmp3_0; result[row + 3][column + 1] = tmp.tmp3_1; result[row + 3][column + 2] = tmp.tmp3_2; result[row + 3][column + 3] = tmp.tmp3_3; result[row + 3][column + 4] = tmp.tmp3_4; result[row + 3][column + 5] = tmp.tmp3_5;
+                    result[row + 4][column + 0] = tmp.tmp4_0; result[row + 4][column + 1] = tmp.tmp4_1; result[row + 4][column + 2] = tmp.tmp4_2; result[row + 4][column + 3] = tmp.tmp4_3; result[row + 4][column + 4] = tmp.tmp4_4; result[row + 4][column + 5] = tmp.tmp4_5;
+                    result[row + 5][column + 0] = tmp.tmp5_0; result[row + 5][column + 1] = tmp.tmp5_1; result[row + 5][column + 2] = tmp.tmp5_2; result[row + 5][column + 3] = tmp.tmp5_3; result[row + 5][column + 4] = tmp.tmp5_4; result[row + 5][column + 5] = tmp.tmp5_5;
                 }
 
                 for (; column < columns; column++)
