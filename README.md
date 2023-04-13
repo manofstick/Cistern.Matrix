@@ -35,3 +35,6 @@ But this was a reasonable effort... Doesn't use any fancy Intrinsics, in fact co
 |        |      |                  |                |                |       |         |
 |    Mlk | 4096 | 1,286,040.549 us |  7,154.3866 us |  6,342.1774 us |  1.00 |    0.00 |
 | SixSix | 4096 | 1,617,340.187 us | 31,538.9503 us | 50,929.5259 us |  1.24 |    0.04 |
+|        |      |                  |                |                |       |         |
+|    Mlk | 8192 |  7.940 s | 0.1490 s | 0.2137 s |  1.00 |    0.00 |
+| SixSix | 8192 | 15.407 s | 0.3052 s | 0.4377 s |  1.94 |    0.08 |
