@@ -26,11 +26,11 @@ public class Multiplication<T>
 
     ref struct Args
     {
-        public Span<Vector<T>> A0; public Span<Vector<T>> A1; public Span<Vector<T>> A2; public Span<Vector<T>> A3;
-        public Span<Vector<T>> A4; public Span<Vector<T>> A5; public Span<Vector<T>> A6; public Span<Vector<T>> A7; 
+        public ReadOnlySpan<Vector<T>> A0; public ReadOnlySpan<Vector<T>> A1; public ReadOnlySpan<Vector<T>> A2; public ReadOnlySpan<Vector<T>> A3;
+        public ReadOnlySpan<Vector<T>> A4; public ReadOnlySpan<Vector<T>> A5; public ReadOnlySpan<Vector<T>> A6; public ReadOnlySpan<Vector<T>> A7; 
 
-        public Span<Vector<T>> BT0; public Span<Vector<T>> BT1; public Span<Vector<T>> BT2; public Span<Vector<T>> BT3; 
-        public Span<Vector<T>> BT4; public Span<Vector<T>> BT5; public Span<Vector<T>> BT6; public Span<Vector<T>> BT7;
+        public ReadOnlySpan<Vector<T>> BT0; public ReadOnlySpan<Vector<T>> BT1; public ReadOnlySpan<Vector<T>> BT2; public ReadOnlySpan<Vector<T>> BT3; 
+        public ReadOnlySpan<Vector<T>> BT4; public ReadOnlySpan<Vector<T>> BT5; public ReadOnlySpan<Vector<T>> BT6; public ReadOnlySpan<Vector<T>> BT7;
     }
 
 
@@ -103,13 +103,14 @@ public class Multiplication<T>
     {
         var rows = A.Length;
         var columns = BT.Length;
+        var innerLength = A[0].Length;
 
         var result = Utils<T>.CreateZero(rows, columns);
 
         var rowsPerIteration = Rows;
         var rowIterationsCount = (rows+rowsPerIteration-1) / rowsPerIteration;
         var rowsBatchesPerIteration = (rowIterationsCount+ProcessorCount-1) / ProcessorCount;
-        var batchesCount = (rowIterationsCount+rowsBatchesPerIteration-1) / rowsBatchesPerIteration; 
+        var batchesCount = (rowIterationsCount+rowsBatchesPerIteration-1) / rowsBatchesPerIteration;
         
         Parallel.For(0, batchesCount, parallelForIdx => {
             var startIdx = parallelForIdx * rowsBatchesPerIteration * rowsPerIteration;
@@ -119,41 +120,25 @@ public class Multiplication<T>
             for (; r < endIdx - rowsPerIteration + 1; r += rowsPerIteration)
             {
                 Args args = new();
-                var A0 = A[r+0].AsSpan();
-                var A1 = A[r+1].AsSpan();
-                var A2 = A[r+2].AsSpan();
-                var A3 = A[r+3].AsSpan();
-                var A4 = A[r+4].AsSpan();
-                var A5 = A[r+5].AsSpan();
-                var A6 = A[r+6].AsSpan();
-                var A7 = A[r+7].AsSpan();
-                args.A0 = MemoryMarshal.Cast<T, Vector<T>>(A0);
-                args.A1 = MemoryMarshal.Cast<T, Vector<T>>(A1);
-                args.A2 = MemoryMarshal.Cast<T, Vector<T>>(A2);
-                args.A3 = MemoryMarshal.Cast<T, Vector<T>>(A3);
-                args.A4 = MemoryMarshal.Cast<T, Vector<T>>(A4);
-                args.A5 = MemoryMarshal.Cast<T, Vector<T>>(A5);
-                args.A6 = MemoryMarshal.Cast<T, Vector<T>>(A6);
-                args.A7 = MemoryMarshal.Cast<T, Vector<T>>(A7);
+                var A0 = Get(A, r+0, out args.A0);
+                var A1 = Get(A, r+1, out args.A1);
+                var A2 = Get(A, r+2, out args.A2);
+                var A3 = Get(A, r+3, out args.A3);
+                var A4 = Get(A, r+4, out args.A4);
+                var A5 = Get(A, r+5, out args.A5);
+                var A6 = Get(A, r+6, out args.A6);
+                var A7 = Get(A, r+7, out args.A7);
                 var c = 0;
                 for (; c < columns - Cols + 1; c += Cols)
                 {
-                    var BT0 = BT[c+0].AsSpan();
-                    var BT1 = BT[c+1].AsSpan();
-                    var BT2 = BT[c+2].AsSpan();
-                    var BT3 = BT[c+3].AsSpan();
-                    var BT4 = BT[c+4].AsSpan();
-                    var BT5 = BT[c+5].AsSpan();
-                    var BT6 = BT[c+6].AsSpan();
-                    var BT7 = BT[c+7].AsSpan();
-                    args.BT0 = MemoryMarshal.Cast<T, Vector<T>>(BT0);
-                    args.BT1 = MemoryMarshal.Cast<T, Vector<T>>(BT1);
-                    args.BT2 = MemoryMarshal.Cast<T, Vector<T>>(BT2);
-                    args.BT3 = MemoryMarshal.Cast<T, Vector<T>>(BT3);
-                    args.BT4 = MemoryMarshal.Cast<T, Vector<T>>(BT4);
-                    args.BT5 = MemoryMarshal.Cast<T, Vector<T>>(BT5);
-                    args.BT6 = MemoryMarshal.Cast<T, Vector<T>>(BT6);
-                    args.BT7 = MemoryMarshal.Cast<T, Vector<T>>(BT7);
+                    var BT0 = Get(BT, c+0, out args.BT0);
+                    var BT1 = Get(BT, c+1, out args.BT1);
+                    var BT2 = Get(BT, c+2, out args.BT2);
+                    var BT3 = Get(BT, c+3, out args.BT3);
+                    var BT4 = Get(BT, c+4, out args.BT4);
+                    var BT5 = Get(BT, c+5, out args.BT5);
+                    var BT6 = Get(BT, c+6, out args.BT6);
+                    var BT7 = Get(BT, c+7, out args.BT7);
 
                     InnerLoop(args, out var x);
 
@@ -180,88 +165,70 @@ public class Multiplication<T>
 
                 for (; c < columns; c++)
                 {
-                    var BTRow = BT[c].AsSpan();
-                    var BTRowVector = MemoryMarshal.Cast<T, Vector<T>>(BTRow);
-                    var V0 = Vector<T>.Zero;
-                    var V1 = Vector<T>.Zero;
-                    var V2 = Vector<T>.Zero;
-                    var V3 = Vector<T>.Zero;
-                    var V4 = Vector<T>.Zero;
-                    var V5 = Vector<T>.Zero;
-                    var V6 = Vector<T>.Zero;
-                    var V7 = Vector<T>.Zero;
+                    var BTS = Get(BT, c, out var BTV);
+                    Vector<T> V0 = Zero, V1 = Zero, V2 = Zero, V3 = Zero, V4 = Zero, V5 = Zero, V6 = Zero, V7 = Zero;
                     for (var i = 0; i < args.A0.Length; ++i)
                     {
-                        V0 += args.A0[i] * BTRowVector[i];
-                        V1 += args.A1[i] * BTRowVector[i];
-                        V2 += args.A2[i] * BTRowVector[i];
-                        V3 += args.A3[i] * BTRowVector[i];
-                        V4 += args.A4[i] * BTRowVector[i];
-                        V5 += args.A5[i] * BTRowVector[i];
-                        V6 += args.A6[i] * BTRowVector[i];
-                        V7 += args.A7[i] * BTRowVector[i];
+                        V0 += args.A0[i] * BTV[i];
+                        V1 += args.A1[i] * BTV[i];
+                        V2 += args.A2[i] * BTV[i];
+                        V3 += args.A3[i] * BTV[i];
+                        V4 += args.A4[i] * BTV[i];
+                        V5 += args.A5[i] * BTV[i];
+                        V6 += args.A6[i] * BTV[i];
+                        V7 += args.A7[i] * BTV[i];
                     }
-                    var tmp0 = T.Zero;
-                    var tmp1 = T.Zero;
-                    var tmp2 = T.Zero;
-                    var tmp3 = T.Zero;
-                    var tmp4 = T.Zero;
-                    var tmp5 = T.Zero;
-                    var tmp6 = T.Zero;
-                    var tmp7 = T.Zero;
+                    T T0 = T.Zero, T1 = T.Zero, T2 = T.Zero, T3 = T.Zero, T4 = T.Zero, T5 = T.Zero, T6 = T.Zero, T7 = T.Zero;
                     for (var i = 0; i < Vector<T>.Count; ++i)
                     {
-                        tmp0 += V0[i];
-                        tmp1 += V1[i];
-                        tmp2 += V2[i];
-                        tmp3 += V3[i];
-                        tmp4 += V4[i];
-                        tmp5 += V5[i];
-                        tmp6 += V6[i];
-                        tmp7 += V7[i];
+                        T0 += V0[i]; T1 += V1[i]; T2 += V2[i]; T3 += V3[i]; T4 += V4[i]; T5 += V5[i]; T6 += V6[i]; T7 += V7[i];
                     }
                     for (var i = args.A0.Length * Vector<T>.Count; i < A0.Length; ++i)
                     {
-                        tmp0 += A0[i] * BTRow[i];
-                        tmp1 += A1[i] * BTRow[i];
-                        tmp2 += A2[i] * BTRow[i];
-                        tmp3 += A3[i] * BTRow[i];
-                        tmp4 += A4[i] * BTRow[i];
-                        tmp5 += A5[i] * BTRow[i];
-                        tmp6 += A6[i] * BTRow[i];
-                        tmp7 += A7[i] * BTRow[i];
+                        T0 += A0[i] * BTS[i];
+                        T1 += A1[i] * BTS[i];
+                        T2 += A2[i] * BTS[i];
+                        T3 += A3[i] * BTS[i];
+                        T4 += A4[i] * BTS[i];
+                        T5 += A5[i] * BTS[i];
+                        T6 += A6[i] * BTS[i];
+                        T7 += A7[i] * BTS[i];
                     }
-                    result[r+0][c] = tmp0;
-                    result[r+1][c] = tmp1;
-                    result[r+2][c] = tmp2;
-                    result[r+3][c] = tmp3;
-                    result[r+4][c] = tmp4;
-                    result[r+5][c] = tmp5;
-                    result[r+6][c] = tmp6;
-                    result[r+7][c] = tmp7;
+                    result[r+0][c] = T0;
+                    result[r+1][c] = T1;
+                    result[r+2][c] = T2;
+                    result[r+3][c] = T3;
+                    result[r+4][c] = T4;
+                    result[r+5][c] = T5;
+                    result[r+6][c] = T6;
+                    result[r+7][c] = T7;
                 }
             }
             for (; r < endIdx; ++r)
             {
-                var ARow = A[r].AsSpan();
-                var ARowVector = MemoryMarshal.Cast<T, Vector<T>>(ARow);
+                var ARow = Get(A, r, out var ARowVector);
                 for (var column = 0; column < columns; column++)
                 {
-                    var BTRow = BT[column].AsSpan();
-                    var BTRowVector = MemoryMarshal.Cast<T, Vector<T>>(BTRow);
+                    var BTRow = Get(BT, column, out var BTRowVector);
                     var V = Vector<T>.Zero;
                     for (var i = 0; i < ARowVector.Length; ++i)
                         V += ARowVector[i] * BTRowVector[i];
-                    var tmp = T.Zero;
+                    var T0 = T.Zero;
                     for (var i = 0; i < Vector<T>.Count; ++i)
-                        tmp += V[i];
+                        T0 += V[i];
                     for (var i = ARowVector.Length * Vector<T>.Count; i < ARow.Length; ++i)
-                        tmp += ARow[i] * BTRow[i];
-                    result[r][column] = tmp;
+                        T0 += ARow[i] * BTRow[i];
+                    result[r][column] = T0;
                 }
             }
         });
 
         return result;
     }        
+
+    static ReadOnlySpan<T> Get(T[][] src, int idx, out ReadOnlySpan<Vector<T>> vectorized)
+    {
+        vectorized = MemoryMarshal.Cast<T, Vector<T>>(src[idx]);
+        return src[idx];
+    } 
 }
