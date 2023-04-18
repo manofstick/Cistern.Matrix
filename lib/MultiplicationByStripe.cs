@@ -88,11 +88,13 @@ public class MultiplicationByStripe<T>
 
     ref struct Args
     {
-        public Span<Vector<T>> aRowV;
+        public Span<Vector<T>> aRowV0;
+        public Span<Vector<T>> aRowV1;
 
         public Span<T> bColumn;
 
-        public Span<Vector<T>> result;
+        public Span<Vector<T>> result0;
+        public Span<Vector<T>> result1;
     }
 
     private static Vector<T> Zero => Vector<T>.Zero;
@@ -100,33 +102,44 @@ public class MultiplicationByStripe<T>
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private unsafe static void InnerLoop(Args args)
     {
-        Vector<T> r0 = Zero,  r1 = Zero,  r2 = Zero, r3 = Zero;
+        Vector<T> r0_0 = Zero,  r0_1 = Zero,  r0_2 = Zero, r0_3 = Zero;
+        Vector<T> r1_0 = Zero,  r1_1 = Zero,  r1_2 = Zero, r1_3 = Zero;
 
-        var count = args.aRowV.Length;
+        var count = args.aRowV0.Length;
 
-        fixed (Vector<T>* aRowV = args.aRowV)
+        fixed (Vector<T>* aRowV0 = args.aRowV0, aRowV1 = args.aRowV1)
         fixed (T* bColumn = args.bColumn)
         for(var i=0; i < count; ++i)
         {
-            var r = aRowV[i];
+            var r0 = aRowV0[i];
+            var r1 = aRowV1[i];
 
             var c0 = new Vector<T>(bColumn[(i*Vector<T>.Count)+0]);
-            r0 += r * c0;
+            r0_0 += r0 * c0;
+            r1_0 += r1 * c0;
 
             var c1 = new Vector<T>(bColumn[(i*Vector<T>.Count)+1]);
-            r1 += r * c1;
+            r0_1 += r0 * c1;
+            r1_1 += r1 * c1;
 
             var c2 = new Vector<T>(bColumn[(i*Vector<T>.Count)+2]);
-            r2 += r * c2;
+            r0_2 += r0 * c2;
+            r1_2 += r1 * c2;
 
             var c3 = new Vector<T>(bColumn[(i*Vector<T>.Count)+3]);
-            r3 += r * c3;
+            r0_3 += r0 * c3;
+            r1_3 += r1 * c3;
         }
 
-        args.result[0] = r0;
-        args.result[1] = r1;
-        args.result[2] = r2;
-        args.result[3] = r3;
+        args.result0[0] = r0_0;
+        args.result0[1] = r0_1;
+        args.result0[2] = r0_2;
+        args.result0[3] = r0_3;
+
+        args.result1[0] = r1_0;
+        args.result1[1] = r1_1;
+        args.result1[2] = r1_2;
+        args.result1[3] = r1_3;
     }
 
     public static T[][] Reshape(T[][] striped, int rows, int columns)
@@ -161,22 +174,25 @@ public class MultiplicationByStripe<T>
             results[i] = new T[stripedBounds.M];
 
         var args = new Args();
-        for(var row=0; row < a.Length; ++row)
+        for(var row=0; row < a.Length; row+=2)
         {
-            var aRow = a[row].AsSpan();
-            var aRowV = MemoryMarshal.Cast<T, Vector<T>>(aRow);
+            var aRow0 = a[row+0].AsSpan();
+            var aRow1 = a[row+1].AsSpan();
+            args.aRowV0 = MemoryMarshal.Cast<T, Vector<T>>(aRow0);
+            args.aRowV1 = MemoryMarshal.Cast<T, Vector<T>>(aRow1);
 
-            var rRow = results[row].AsSpan();
-            var rRowV = MemoryMarshal.Cast<T, Vector<T>>(rRow);
-
-            args.aRowV = aRowV;
+            var rRow0 = results[row+0].AsSpan();
+            var rRow1 = results[row+1].AsSpan();
+            var rRowV0 = MemoryMarshal.Cast<T, Vector<T>>(rRow0);
+            var rRowV1 = MemoryMarshal.Cast<T, Vector<T>>(rRow1);
 
             for (var column=0; column < b.Length; ++column)
             {
                 args.bColumn = b[column].AsSpan();
 
                 var resultIdx = (column*Vector<T>.Count);
-                args.result = rRowV[resultIdx..(resultIdx+4)];
+                args.result0 = rRowV0[resultIdx..(resultIdx+4)];
+                args.result1 = rRowV1[resultIdx..(resultIdx+4)];
 
                 InnerLoop(args);
             }

@@ -139,7 +139,8 @@ public class Matrices
     {
         var expected = Mlk();
 
-        EqualOrThrow(expected, Test());
+        EqualOrThrow(expected, EightEight());
+        EqualOrThrow(expected, Stripe());
     }
 
     [Benchmark(Baseline=true)]
@@ -173,7 +174,7 @@ public class Matrices
     }
 
 
-    [//Benchmark]
+    //[Benchmark]
     public double[][] EightEight() 
     {
         var result = Multiplication<double>.Multiply(A, B);
