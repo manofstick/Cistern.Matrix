@@ -188,6 +188,8 @@ public class MultiplicationByStripe<T>
         return results;
     }
 
+    static private readonly int ProcessorCount = Environment.ProcessorCount;
+
     public static T[][] Multiply(T[][] A, T[][] B)
     {
         var a = StripedA(A);
@@ -199,40 +201,55 @@ public class MultiplicationByStripe<T>
         for(var i=0; i < results.Length; ++i)
             results[i] = new T[stripedBounds.M];
 
-        var args = new Args();
-        for(var row=0; row < a.Length-4+1; row+=4)
-        {
-            var aRow0 = a[row+0].AsSpan();
-            var aRow1 = a[row+1].AsSpan();
-            var aRow2 = a[row+2].AsSpan();
-            var aRow3 = a[row+3].AsSpan();
-            args.aRowV0 = MemoryMarshal.Cast<T, Vector<T>>(aRow0);
-            args.aRowV1 = MemoryMarshal.Cast<T, Vector<T>>(aRow1);
-            args.aRowV2 = MemoryMarshal.Cast<T, Vector<T>>(aRow2);
-            args.aRowV3 = MemoryMarshal.Cast<T, Vector<T>>(aRow3);
+        var rows = a.Length;
 
-            var rRow0 = results[row+0].AsSpan();
-            var rRow1 = results[row+1].AsSpan();
-            var rRow2 = results[row+2].AsSpan();
-            var rRow3 = results[row+3].AsSpan();
-            var rRowV0 = MemoryMarshal.Cast<T, Vector<T>>(rRow0);
-            var rRowV1 = MemoryMarshal.Cast<T, Vector<T>>(rRow1);
-            var rRowV2 = MemoryMarshal.Cast<T, Vector<T>>(rRow2);
-            var rRowV3 = MemoryMarshal.Cast<T, Vector<T>>(rRow3);
+        var rowsPerIteration = 4;
+        var rowIterationsCount = (rows+rowsPerIteration-1) / rowsPerIteration;
+        var rowsBatchesPerIteration = (rowIterationsCount+ProcessorCount-1) / ProcessorCount;
+        var batchesCount = (rowIterationsCount+rowsBatchesPerIteration-1) / rowsBatchesPerIteration;
+        
+        var options = new ParallelOptions();
+//        options.MaxDegreeOfParallelism = 1;
+        Parallel.For(0, batchesCount, options, parallelForIdx => {
+            var startIdx = parallelForIdx * rowsBatchesPerIteration * rowsPerIteration;
+            var endIdx = Math.Min(rows, (parallelForIdx+1) * rowsBatchesPerIteration * rowsPerIteration);
 
-            for (var column=0; column < b.Length; ++column)
+            var row = startIdx;
+            var args = new Args();
+            for (; row < endIdx - rowsPerIteration + 1; row += rowsPerIteration)
             {
-                args.bColumn = b[column].AsSpan();
+                var aRow0 = a[row+0].AsSpan();
+                var aRow1 = a[row+1].AsSpan();
+                var aRow2 = a[row+2].AsSpan();
+                var aRow3 = a[row+3].AsSpan();
+                args.aRowV0 = MemoryMarshal.Cast<T, Vector<T>>(aRow0);
+                args.aRowV1 = MemoryMarshal.Cast<T, Vector<T>>(aRow1);
+                args.aRowV2 = MemoryMarshal.Cast<T, Vector<T>>(aRow2);
+                args.aRowV3 = MemoryMarshal.Cast<T, Vector<T>>(aRow3);
 
-                var resultIdx = (column*Vector<T>.Count);
-                args.result0 = rRowV0[resultIdx..(resultIdx+4)];
-                args.result1 = rRowV1[resultIdx..(resultIdx+4)];
-                args.result2 = rRowV2[resultIdx..(resultIdx+4)];
-                args.result3 = rRowV3[resultIdx..(resultIdx+4)];
+                var rRow0 = results[row+0].AsSpan();
+                var rRow1 = results[row+1].AsSpan();
+                var rRow2 = results[row+2].AsSpan();
+                var rRow3 = results[row+3].AsSpan();
+                var rRowV0 = MemoryMarshal.Cast<T, Vector<T>>(rRow0);
+                var rRowV1 = MemoryMarshal.Cast<T, Vector<T>>(rRow1);
+                var rRowV2 = MemoryMarshal.Cast<T, Vector<T>>(rRow2);
+                var rRowV3 = MemoryMarshal.Cast<T, Vector<T>>(rRow3);
 
-                InnerLoop(args);
+                for (var column=0; column < b.Length; ++column)
+                {
+                    args.bColumn = b[column].AsSpan();
+
+                    var resultIdx = (column*Vector<T>.Count);
+                    args.result0 = rRowV0[resultIdx..(resultIdx+4)];
+                    args.result1 = rRowV1[resultIdx..(resultIdx+4)];
+                    args.result2 = rRowV2[resultIdx..(resultIdx+4)];
+                    args.result3 = rRowV3[resultIdx..(resultIdx+4)];
+
+                    InnerLoop(args);
+                }
             }
-        }
+        });
 
         var bounds = GetBounds(A, B);
 
