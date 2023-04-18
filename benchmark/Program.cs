@@ -3,8 +3,16 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Cistern.Matrix;
 
-var summary = BenchmarkRunner.Run<Matrices>();
+#if trueX
+    var m = new Matrices();
+    m.L = 128;
+    m.M = 128; //10;
+    m.N = 128;
+    m.GlobalSetup();
+    return;
+#endif
 
+var summary = BenchmarkRunner.Run<Matrices>();
 // BenchmarkDotNet=v0.13.5, OS=ubuntu 22.04
 // 12th Gen Intel Core i5-1240P, 1 CPU, 16 logical and 12 physical cores
 // .NET SDK=7.0.201
@@ -42,6 +50,37 @@ var summary = BenchmarkRunner.Run<Matrices>();
 
 
 
+
+// | Method | Size |             Mean |          Error |         StdDev |           Median | Ratio | RatioSD |
+// |------- |----- |-----------------:|---------------:|---------------:|-----------------:|------:|--------:|
+// |    Mlk |   16 |         3.352 us |      0.0658 us |      0.0616 us |         3.338 us |  1.00 |    0.00 |
+// |   Test |   16 |         1.721 us |      0.0125 us |      0.0117 us |         1.725 us |  0.51 |    0.01 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk |   32 |        10.718 us |      0.0981 us |      0.0869 us |        10.736 us |  1.00 |    0.00 |
+// |   Test |   32 |         7.649 us |      0.0232 us |      0.0206 us |         7.646 us |  0.71 |    0.01 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk |   64 |        68.667 us |      1.3436 us |      1.6992 us |        68.786 us |  1.00 |    0.00 |
+// |   Test |   64 |        40.701 us |      0.1082 us |      0.1012 us |        40.662 us |  0.59 |    0.02 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk |  128 |       330.736 us |     11.6330 us |     34.3001 us |       331.427 us |  1.00 |    0.00 |
+// |   Test |  128 |       260.014 us |      5.0668 us |      6.0316 us |       255.840 us |  0.83 |    0.09 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk |  256 |     1,371.664 us |     26.5972 us |     31.6621 us |     1,368.600 us |  1.00 |    0.00 |
+// |   Test |  256 |     1,717.792 us |      2.6319 us |      2.3331 us |     1,718.487 us |  1.26 |    0.03 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk |  512 |     8,340.761 us |    199.6036 us |    588.5357 us |     8,344.016 us |  1.00 |    0.00 |
+// |   Test |  512 |    13,149.402 us |     43.2417 us |     38.3326 us |    13,139.288 us |  1.58 |    0.13 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk | 1024 |    33,849.816 us |    268.9546 us |    224.5892 us |    33,811.765 us |  1.00 |    0.00 |
+// |   Test | 1024 |   116,039.237 us |  1,558.7725 us |  1,381.8112 us |   115,708.433 us |  3.43 |    0.05 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk | 2048 |   216,023.824 us |    633.7686 us |    529.2255 us |   215,917.824 us |  1.00 |    0.00 |
+// |   Test | 2048 | 1,137,705.371 us |  5,120.4131 us |  3,997.6817 us | 1,139,310.210 us |  5.27 |    0.03 |
+// |        |      |                  |                |                |                  |       |         |
+// |    Mlk | 4096 | 1,202,442.135 us | 22,838.3324 us | 28,047.5232 us | 1,194,687.930 us |  1.00 |    0.00 |
+// |   Test | 4096 | 9,119,023.955 us | 26,675.2172 us | 23,646.8852 us | 9,115,573.139 us |  7.54 |    0.20 |
+
+
 public class Matrices
 {
     [Params(16, 32, 64, 128, 256, 512, 1024, 2048, 4096)]
@@ -58,14 +97,18 @@ public class Matrices
     [GlobalSetup]
     public void GlobalSetup()
     {
+#if true
         L = Size;
         M = Size;
         N = Size;
 
         var r = new Random(42);
-
         A = Utils<double>.Create(L, M, (_, _) => r.NextDouble());
         B = Utils<double>.Create(M, N, (_, _) => r.NextDouble());
+#else
+        A = Utils<double>.Create(L, M, (r, c) => r*M+c);
+        B = Utils<double>.Create(M, N, (r, c) => -(r*N+c));
+#endif
 
         Validate();
     }
@@ -96,7 +139,7 @@ public class Matrices
     {
         var expected = Mlk();
 
-        EqualOrThrow(expected, SixSix());
+        EqualOrThrow(expected, Test());
     }
 
     [Benchmark(Baseline=true)]
@@ -120,7 +163,7 @@ public class Matrices
 
         for (i = 0; i < m; i++)
         {
-            for (j = 0; j < n; j++)
+            for (j = 0; j < q; j++)
             {
                 c[i][j] = cc[i,j];
             }
@@ -129,10 +172,20 @@ public class Matrices
         return c;
     }
 
-    [Benchmark]
-    public double[][] SixSix() 
+
+    [//Benchmark]
+    public double[][] EightEight() 
     {
         var result = Multiplication<double>.Multiply(A, B);
+
+        return result;
+    }
+
+    [Benchmark]
+    public double[][] Stripe() 
+    {
+        var result = MultiplicationByStripe<double>.Multiply(A, B);
+
         return result;
     }
 }

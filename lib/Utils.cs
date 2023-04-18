@@ -12,16 +12,15 @@ public static class Utils<T>
 
     public static T[][] Create(int rows, int columns, Func<int, int, T> create)
     {
-        var a = new T[columns][];
+        var a = new T[rows][];
         for (var i=0; i < a.Length; ++i)
         {
-            a[i] = new T[rows];
+            a[i] = new T[columns];
             for(var j=0; j < a[i].Length; ++j)
                 a[i][j] = create(i, j);
         }
         return a;
     }
-
 
     public static T[][] Transpose(T[][] A)
     {
