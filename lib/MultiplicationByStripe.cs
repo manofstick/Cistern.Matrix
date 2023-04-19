@@ -117,34 +117,22 @@ public class MultiplicationByStripe<T>
         fixed (T* bColumn = args.bColumn)
         for(var i=0; i < count; ++i)
         {
-            var r0 = aRowV0[i];
-            var r1 = aRowV1[i];
-            var r2 = aRowV2[i];
-            var r3 = aRowV3[i];
-
-            var c0 = new Vector<T>(bColumn[(i*Vector<T>.Count)+0]);
-            r0_0 += r0 * c0;
-            r1_0 += r1 * c0;
-            r2_0 += r2 * c0;
-            r3_0 += r3 * c0;
-
-            var c1 = new Vector<T>(bColumn[(i*Vector<T>.Count)+1]);
-            r0_1 += r0 * c1;
-            r1_1 += r1 * c1;
-            r2_1 += r2 * c1;
-            r3_1 += r3 * c1;
-
-            var c2 = new Vector<T>(bColumn[(i*Vector<T>.Count)+2]);
-            r0_2 += r0 * c2;
-            r1_2 += r1 * c2;
-            r2_2 += r2 * c2;
-            r3_2 += r3 * c2;
-
-            var c3 = new Vector<T>(bColumn[(i*Vector<T>.Count)+3]);
-            r0_3 += r0 * c3;
-            r1_3 += r1 * c3;
-            r2_3 += r2 * c3;
-            r3_3 += r3 * c3;
+            r0_0 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+0];
+            r1_0 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+0];
+            r2_0 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+0];
+            r3_0 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+0];
+            r0_1 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+1];
+            r1_1 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+1];
+            r2_1 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+1];
+            r3_1 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+1];
+            r0_2 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+2];
+            r1_2 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+2];
+            r2_2 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+2];
+            r3_2 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+2];
+            r0_3 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+3];
+            r1_3 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+3];
+            r2_3 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+3];
+            r3_3 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+3];
         }
 
         args.result0[0] = r0_0;
