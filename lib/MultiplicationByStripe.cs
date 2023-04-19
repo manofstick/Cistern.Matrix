@@ -92,9 +92,12 @@ public class MultiplicationByStripe<T>
         public Span<Vector<T>> Row1;
 
         public Span<T> Column0;
+        public Span<T> Column1;
 
-        public Span<Vector<T>> Result0;
-        public Span<Vector<T>> Result1;
+        public Span<Vector<T>> Result00;
+        public Span<Vector<T>> Result10;
+        public Span<Vector<T>> Result01;
+        public Span<Vector<T>> Result11;
     }
 
     private static Vector<T> Zero => Vector<T>.Zero;
@@ -102,34 +105,55 @@ public class MultiplicationByStripe<T>
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private unsafe static void InnerLoop(Args args)
     {
-        Vector<T> r0_0 = Zero, r0_1 = Zero, r0_2 = Zero, r0_3 = Zero;
-        Vector<T> r1_0 = Zero, r1_1 = Zero, r1_2 = Zero, r1_3 = Zero;
+        Vector<T> v00_0 = Zero, v00_1 = Zero, v00_2 = Zero, v00_3 = Zero;
+        Vector<T> v10_0 = Zero, v10_1 = Zero, v10_2 = Zero, v10_3 = Zero;
+        Vector<T> v01_0 = Zero, v01_1 = Zero, v01_2 = Zero, v01_3 = Zero;
+        Vector<T> v11_0 = Zero, v11_1 = Zero, v11_2 = Zero, v11_3 = Zero;
 
         var count = args.Row0.Length;
 
-        fixed (Vector<T>* aRowV0 = args.Row0, aRowV1 = args.Row1)
-        fixed (T* bColumn = args.Column0)
+        fixed (Vector<T>* R0 = args.Row0, R1 = args.Row1)
+        fixed (T* C0 = args.Column0, C1 = args.Column1)
         for(var i=0; i < count; ++i)
         {
-            r0_0 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+0];
-            r1_0 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+0];
-            r0_1 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+1];
-            r1_1 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+1];
-            r0_2 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+2];
-            r1_2 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+2];
-            r0_3 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+3];
-            r1_3 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+3];
+            v00_0 += R0[i] * C0[(i*Vector<T>.Count)+0];
+            v10_0 += R1[i] * C0[(i*Vector<T>.Count)+0];
+            v00_1 += R0[i] * C0[(i*Vector<T>.Count)+1];
+            v10_1 += R1[i] * C0[(i*Vector<T>.Count)+1];
+            v00_2 += R0[i] * C0[(i*Vector<T>.Count)+2];
+            v10_2 += R1[i] * C0[(i*Vector<T>.Count)+2];
+            v00_3 += R0[i] * C0[(i*Vector<T>.Count)+3];
+            v10_3 += R1[i] * C0[(i*Vector<T>.Count)+3];
+
+            v01_0 += R0[i] * C1[(i*Vector<T>.Count)+0];
+            v11_0 += R1[i] * C1[(i*Vector<T>.Count)+0];
+            v01_1 += R0[i] * C1[(i*Vector<T>.Count)+1];
+            v11_1 += R1[i] * C1[(i*Vector<T>.Count)+1];
+            v01_2 += R0[i] * C1[(i*Vector<T>.Count)+2];
+            v11_2 += R1[i] * C1[(i*Vector<T>.Count)+2];
+            v01_3 += R0[i] * C1[(i*Vector<T>.Count)+3];
+            v11_3 += R1[i] * C1[(i*Vector<T>.Count)+3];
         }
 
-        args.Result0[0] = r0_0;
-        args.Result0[1] = r0_1;
-        args.Result0[2] = r0_2;
-        args.Result0[3] = r0_3;
+        args.Result00[0] = v00_0;
+        args.Result00[1] = v00_1;
+        args.Result00[2] = v00_2;
+        args.Result00[3] = v00_3;
 
-        args.Result1[0] = r1_0;
-        args.Result1[1] = r1_1;
-        args.Result1[2] = r1_2;
-        args.Result1[3] = r1_3;
+        args.Result10[0] = v10_0;
+        args.Result10[1] = v10_1;
+        args.Result10[2] = v10_2;
+        args.Result10[3] = v10_3;
+
+        args.Result01[0] = v01_0;
+        args.Result01[1] = v01_1;
+        args.Result01[2] = v01_2;
+        args.Result01[3] = v01_3;
+
+        args.Result11[0] = v11_0;
+        args.Result11[1] = v11_1;
+        args.Result11[2] = v11_2;
+        args.Result11[3] = v11_3;
     }
 
     public static T[][] Reshape(T[][] striped, int rows, int columns)
@@ -192,13 +216,18 @@ public class MultiplicationByStripe<T>
                 var rRowV0 = MemoryMarshal.Cast<T, Vector<T>>(rRow0);
                 var rRowV1 = MemoryMarshal.Cast<T, Vector<T>>(rRow1);
 
-                for (var column=0; column < b.Length; ++column)
+                for (var column=0; column < b.Length-2+1; column += 2)
                 {
-                    args.Column0 = b[column].AsSpan();
+                    args.Column0 = b[column+0].AsSpan();
+                    args.Column1 = b[column+1].AsSpan();
 
-                    var resultIdx = (column*Vector<T>.Count);
-                    args.Result0 = rRowV0[resultIdx..(resultIdx+4)];
-                    args.Result1 = rRowV1[resultIdx..(resultIdx+4)];
+                    var result0Idx = ((column+0)*Vector<T>.Count);
+                    args.Result00 = rRowV0[result0Idx..(result0Idx+4)];
+                    args.Result10 = rRowV1[result0Idx..(result0Idx+4)];
+
+                    var result1Idx = ((column+1)*Vector<T>.Count);
+                    args.Result01 = rRowV0[result1Idx..(result1Idx+4)];
+                    args.Result11 = rRowV1[result1Idx..(result1Idx+4)];
 
                     InnerLoop(args);
                 }
