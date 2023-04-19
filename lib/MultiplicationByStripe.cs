@@ -88,17 +88,13 @@ public class MultiplicationByStripe<T>
 
     ref struct Args
     {
-        public Span<Vector<T>> aRowV0;
-        public Span<Vector<T>> aRowV1;
-        public Span<Vector<T>> aRowV2;
-        public Span<Vector<T>> aRowV3;
+        public Span<Vector<T>> Row0;
+        public Span<Vector<T>> Row1;
 
-        public Span<T> bColumn;
+        public Span<T> Column0;
 
-        public Span<Vector<T>> result0;
-        public Span<Vector<T>> result1;
-        public Span<Vector<T>> result2;
-        public Span<Vector<T>> result3;
+        public Span<Vector<T>> Result0;
+        public Span<Vector<T>> Result1;
     }
 
     private static Vector<T> Zero => Vector<T>.Zero;
@@ -108,52 +104,32 @@ public class MultiplicationByStripe<T>
     {
         Vector<T> r0_0 = Zero, r0_1 = Zero, r0_2 = Zero, r0_3 = Zero;
         Vector<T> r1_0 = Zero, r1_1 = Zero, r1_2 = Zero, r1_3 = Zero;
-        Vector<T> r2_0 = Zero, r2_1 = Zero, r2_2 = Zero, r2_3 = Zero;
-        Vector<T> r3_0 = Zero, r3_1 = Zero, r3_2 = Zero, r3_3 = Zero;
 
-        var count = args.aRowV0.Length;
+        var count = args.Row0.Length;
 
-        fixed (Vector<T>* aRowV0 = args.aRowV0, aRowV1 = args.aRowV1, aRowV2 = args.aRowV2, aRowV3 = args.aRowV3)
-        fixed (T* bColumn = args.bColumn)
+        fixed (Vector<T>* aRowV0 = args.Row0, aRowV1 = args.Row1)
+        fixed (T* bColumn = args.Column0)
         for(var i=0; i < count; ++i)
         {
             r0_0 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+0];
             r1_0 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+0];
-            r2_0 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+0];
-            r3_0 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+0];
             r0_1 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+1];
             r1_1 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+1];
-            r2_1 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+1];
-            r3_1 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+1];
             r0_2 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+2];
             r1_2 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+2];
-            r2_2 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+2];
-            r3_2 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+2];
             r0_3 += aRowV0[i] * bColumn[(i*Vector<T>.Count)+3];
             r1_3 += aRowV1[i] * bColumn[(i*Vector<T>.Count)+3];
-            r2_3 += aRowV2[i] * bColumn[(i*Vector<T>.Count)+3];
-            r3_3 += aRowV3[i] * bColumn[(i*Vector<T>.Count)+3];
         }
 
-        args.result0[0] = r0_0;
-        args.result0[1] = r0_1;
-        args.result0[2] = r0_2;
-        args.result0[3] = r0_3;
+        args.Result0[0] = r0_0;
+        args.Result0[1] = r0_1;
+        args.Result0[2] = r0_2;
+        args.Result0[3] = r0_3;
 
-        args.result1[0] = r1_0;
-        args.result1[1] = r1_1;
-        args.result1[2] = r1_2;
-        args.result1[3] = r1_3;
-
-        args.result2[0] = r2_0;
-        args.result2[1] = r2_1;
-        args.result2[2] = r2_2;
-        args.result2[3] = r2_3;
-
-        args.result3[0] = r3_0;
-        args.result3[1] = r3_1;
-        args.result3[2] = r3_2;
-        args.result3[3] = r3_3;
+        args.Result1[0] = r1_0;
+        args.Result1[1] = r1_1;
+        args.Result1[2] = r1_2;
+        args.Result1[3] = r1_3;
     }
 
     public static T[][] Reshape(T[][] striped, int rows, int columns)
@@ -191,7 +167,7 @@ public class MultiplicationByStripe<T>
 
         var rows = a.Length;
 
-        var rowsPerIteration = 4;
+        var rowsPerIteration = 2;
         var rowIterationsCount = (rows+rowsPerIteration-1) / rowsPerIteration;
         var rowsBatchesPerIteration = (rowIterationsCount+ProcessorCount-1) / ProcessorCount;
         var batchesCount = (rowIterationsCount+rowsBatchesPerIteration-1) / rowsBatchesPerIteration;
@@ -208,31 +184,21 @@ public class MultiplicationByStripe<T>
             {
                 var aRow0 = a[row+0].AsSpan();
                 var aRow1 = a[row+1].AsSpan();
-                var aRow2 = a[row+2].AsSpan();
-                var aRow3 = a[row+3].AsSpan();
-                args.aRowV0 = MemoryMarshal.Cast<T, Vector<T>>(aRow0);
-                args.aRowV1 = MemoryMarshal.Cast<T, Vector<T>>(aRow1);
-                args.aRowV2 = MemoryMarshal.Cast<T, Vector<T>>(aRow2);
-                args.aRowV3 = MemoryMarshal.Cast<T, Vector<T>>(aRow3);
+                args.Row0 = MemoryMarshal.Cast<T, Vector<T>>(aRow0);
+                args.Row1 = MemoryMarshal.Cast<T, Vector<T>>(aRow1);
 
                 var rRow0 = results[row+0].AsSpan();
                 var rRow1 = results[row+1].AsSpan();
-                var rRow2 = results[row+2].AsSpan();
-                var rRow3 = results[row+3].AsSpan();
                 var rRowV0 = MemoryMarshal.Cast<T, Vector<T>>(rRow0);
                 var rRowV1 = MemoryMarshal.Cast<T, Vector<T>>(rRow1);
-                var rRowV2 = MemoryMarshal.Cast<T, Vector<T>>(rRow2);
-                var rRowV3 = MemoryMarshal.Cast<T, Vector<T>>(rRow3);
 
                 for (var column=0; column < b.Length; ++column)
                 {
-                    args.bColumn = b[column].AsSpan();
+                    args.Column0 = b[column].AsSpan();
 
                     var resultIdx = (column*Vector<T>.Count);
-                    args.result0 = rRowV0[resultIdx..(resultIdx+4)];
-                    args.result1 = rRowV1[resultIdx..(resultIdx+4)];
-                    args.result2 = rRowV2[resultIdx..(resultIdx+4)];
-                    args.result3 = rRowV3[resultIdx..(resultIdx+4)];
+                    args.Result0 = rRowV0[resultIdx..(resultIdx+4)];
+                    args.Result1 = rRowV1[resultIdx..(resultIdx+4)];
 
                     InnerLoop(args);
                 }
